@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -95,6 +96,14 @@ public class PropertyServiceImpl implements PropertyService {
     public Page<PropertySummaryResponse> getAllProperties(Pageable pageable, Map<String, String> filters) {
         Specification<Property> spec = PropertySpecification.fromFilterMap(filters);
         Page<Property> propertiesPage = propertyRepository.findAll(spec, pageable);
+        return propertiesPage.map(this::mapEntityToSummaryResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<PropertySummaryResponse> getPropertiesByUserEmail(String email, Pageable pageable, Map<String, String> filters) {
+        Specification<Property> spec = PropertySpecification.fromFilterMap(filters);
+        Page<Property> propertiesPage = propertyRepository.findAllByLister_Email(email, pageable);
         return propertiesPage.map(this::mapEntityToSummaryResponse);
     }
 
@@ -173,6 +182,7 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     private PropertyDetailResponse mapEntityToDetailResponse(Property entity) {
+
         ListerInfo listerInfo = new ListerInfo(entity.getLister().getId(), entity.getLister().getFullName());
 
         // Extract location and address from locationAddress
@@ -238,7 +248,7 @@ public class PropertyServiceImpl implements PropertyService {
         String mainImageUrl = null;
         if (entity.getImages() != null && !entity.getImages().isEmpty()) {
             mainImageUrl = entity.getImages().stream()
-                    .sorted((i1, i2) -> Integer.compare(i1.getUploadOrder(), i2.getUploadOrder()))
+                    .sorted(Comparator.comparingInt(Image::getUploadOrder))
                     .map(Image::getImageUrl)
                     .findFirst()
                     .orElse(null);
@@ -254,7 +264,8 @@ public class PropertyServiceImpl implements PropertyService {
                 entity.getBedrooms(),
                 bathrooms,
                 areaSqFt,
-                mainImageUrl
+                mainImageUrl,
+                entity.getLister().getId() // Add the lister's UUID
         );
     }
 }

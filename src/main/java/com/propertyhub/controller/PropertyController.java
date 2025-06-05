@@ -3,6 +3,7 @@ package com.propertyhub.controller;
 import com.propertyhub.dto.property.PropertyDetailResponse;
 import com.propertyhub.dto.property.PropertyRequest;
 import com.propertyhub.dto.property.PropertySummaryResponse;
+import com.propertyhub.security.jwt.JwtUtil;
 import com.propertyhub.service.PropertyService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +24,12 @@ import java.util.UUID;
 public class PropertyController {
 
     private final PropertyService propertyService;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    public PropertyController(PropertyService propertyService) {
+    public PropertyController(PropertyService propertyService, JwtUtil jwtUtil) {
         this.propertyService = propertyService;
+        this.jwtUtil = jwtUtil;
     }
 
     @PostMapping
@@ -42,7 +45,7 @@ public class PropertyController {
         return ResponseEntity.ok(property);
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<Page<PropertySummaryResponse>> getAllProperties(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -54,7 +57,7 @@ public class PropertyController {
         Sort.Direction direction = Sort.Direction.fromString(sort.length > 1 ? sort[1] : "desc");
         Sort.Order order = new Sort.Order(direction, sort[0]);
         Pageable pageable = PageRequest.of(page, size, Sort.by(order));
-        
+
         // Remove pagination/sort params from filters map if they are present
         allFilters.remove("page");
         allFilters.remove("size");
@@ -78,5 +81,34 @@ public class PropertyController {
     public ResponseEntity<Void> deleteProperty(@PathVariable UUID propertyId) {
         propertyService.deleteProperty(propertyId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/by-token-email")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Page<PropertySummaryResponse>> getPropertiesByTokenEmail(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id,desc") String[] sort,
+            @RequestParam Map<String, String> allFilters
+    ) {
+        // Extract token from Authorization header
+        String token = authorizationHeader.substring(7); // Remove "Bearer " prefix
+
+        // Extract email from token
+        String email = jwtUtil.extractUsername(token);
+
+        // Construct Pageable with sorting
+        Sort.Direction direction = Sort.Direction.fromString(sort.length > 1 ? sort[1] : "desc");
+        Sort.Order order = new Sort.Order(direction, sort[0]);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(order));
+
+        // Remove pagination/sort params from filters map if they are present
+        allFilters.remove("page");
+        allFilters.remove("size");
+        allFilters.remove("sort");
+
+        Page<PropertySummaryResponse> properties = propertyService.getPropertiesByUserEmail(email, pageable, allFilters);
+        return ResponseEntity.ok(properties);
     }
 }

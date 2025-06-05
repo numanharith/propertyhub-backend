@@ -12,6 +12,9 @@ import java.util.UUID;
 @Repository
 public interface PropertyRepository extends JpaRepository<Property, UUID>, JpaSpecificationExecutor<Property> {
     // JpaSpecificationExecutor allows for dynamic queries using Specifications API
-    // Example: Page<Property> findAllByListerId(UUID listerId, Pageable pageable);
+
+     // Find properties by lister's email
+     Page<Property> findAllByLister_Email(String email, Pageable pageable);
+
     // Basic CRUD methods are inherited from JpaRepository
 }

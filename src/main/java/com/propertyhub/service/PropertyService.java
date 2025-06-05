@@ -13,6 +13,7 @@ public interface PropertyService {
     PropertyDetailResponse createProperty(PropertyRequest propertyRequest);
     PropertyDetailResponse getPropertyById(UUID propertyId);
     Page<PropertySummaryResponse> getAllProperties(Pageable pageable, Map<String, String> filters);
+    Page<PropertySummaryResponse> getPropertiesByUserEmail(String email, Pageable pageable, Map<String, String> filters);
     PropertyDetailResponse updateProperty(UUID propertyId, PropertyRequest propertyRequest);
     void deleteProperty(UUID propertyId);
 }

@@ -22,4 +22,5 @@ public class PropertySummaryResponse {
     private Double bathrooms;
     private Double areaSqFt;
     private String mainImageUrl; // URL of a primary image
+    private UUID listerId; // UUID of the lister (User)
 }
