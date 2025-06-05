@@ -1,0 +1,313 @@
+{
+  "info": {
+    "name": "PropertyHub API",
+    "description": "A collection for the PropertyHub application API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "Endpoints for user registration and authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "register"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"username\": \"testuser\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\",\n    \"firstName\": \"Test\",\n    \"lastName\": \"User\"\n}"
+            },
+            "description": "Register a new user in the system"
+          }
+        },
+        {
+          "name": "Login User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = JSON.parse(responseBody);",
+                  "pm.environment.set(\"auth_token\", jsonData.jwtToken);",
+                  "pm.environment.set(\"user_id\", jsonData.userId);",
+                  "pm.environment.set(\"username\", jsonData.username);",
+                  "pm.environment.set(\"user_role\", jsonData.role);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\"\n}"
+            },
+            "description": "Login with user credentials and receive JWT token"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Properties",
+      "description": "Endpoints for property management",
+      "item": [
+        {
+          "name": "Get All Properties",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/properties?page=0&size=10&sort=id,desc",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "properties"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "Page number (zero-based)"
+                },
+                {
+                  "key": "size",
+                  "value": "10",
+                  "description": "Number of items per page"
+                },
+                {
+                  "key": "sort",
+                  "value": "id,desc",
+                  "description": "Sort field and direction"
+                }
+              ]
+            },
+            "description": "Get a paginated list of properties with optional filtering"
+          }
+        },
+        {
+          "name": "Get Property by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/properties/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "properties", "1"]
+            },
+            "description": "Get detailed information about a specific property"
+          }
+        },
+        {
+          "name": "Create Property",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/properties",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "properties"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Modern Apartment in Downtown\",\n    \"description\": \"A beautiful modern apartment in the heart of downtown.\",\n    \"price\": 250000.00,\n    \"location\": \"Downtown\",\n    \"address\": \"123 Main St, Cityville, State 12345\",\n    \"latitude\": 40.7128,\n    \"longitude\": -74.0060,\n    \"propertyType\": \"APARTMENT\",\n    \"listingType\": \"SALE\",\n    \"bedrooms\": 2,\n    \"bathrooms\": 2.0,\n    \"areaSqFt\": 1200.0,\n    \"amenities\": [\"Gym\", \"Pool\", \"Parking\"],\n    \"imageUrls\": [\"https://example.com/image1.jpg\", \"https://example.com/image2.jpg\"]\n}"
+            },
+            "description": "Create a new property listing (requires LISTER role)"
+          }
+        },
+        {
+          "name": "Update Property",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/properties/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "properties", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"Updated Modern Apartment in Downtown\",\n    \"description\": \"An updated beautiful modern apartment in the heart of downtown.\",\n    \"price\": 260000.00,\n    \"location\": \"Downtown\",\n    \"address\": \"123 Main St, Cityville, State 12345\",\n    \"latitude\": 40.7128,\n    \"longitude\": -74.0060,\n    \"propertyType\": \"APARTMENT\",\n    \"listingType\": \"SALE\",\n    \"bedrooms\": 2,\n    \"bathrooms\": 2.0,\n    \"areaSqFt\": 1200.0,\n    \"amenities\": [\"Gym\", \"Pool\", \"Parking\", \"Security\"],\n    \"imageUrls\": [\"https://example.com/image1.jpg\", \"https://example.com/image2.jpg\"]\n}"
+            },
+            "description": "Update an existing property (requires LISTER role and ownership)"
+          }
+        },
+        {
+          "name": "Delete Property",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/properties/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "properties", "1"]
+            },
+            "description": "Delete a property (requires LISTER role and ownership)"
+          }
+        },
+        {
+          "name": "Filter Properties",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/properties?page=0&size=10&sort=price,asc&propertyType=APARTMENT&minPrice=100000&maxPrice=300000&bedrooms=2&location=Downtown",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "properties"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sort",
+                  "value": "price,asc"
+                },
+                {
+                  "key": "propertyType",
+                  "value": "APARTMENT"
+                },
+                {
+                  "key": "minPrice",
+                  "value": "100000"
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "300000"
+                },
+                {
+                  "key": "bedrooms",
+                  "value": "2"
+                },
+                {
+                  "key": "location",
+                  "value": "Downtown"
+                }
+              ]
+            },
+            "description": "Get properties with specific filters"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "description": "Endpoints for user management",
+      "item": [
+        {
+          "name": "Get Current User",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "me"]
+            },
+            "description": "Get details of the currently authenticated user"
+          }
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    }
+  ]
+}
