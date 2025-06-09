@@ -26,12 +26,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -137,7 +134,7 @@ public class PropertyServiceImpl implements PropertyService {
         entity.setTitle(request.getTitle());
         entity.setDescription(request.getDescription());
         entity.setPrice(new BigDecimal(request.getPrice().toString()));
-        entity.setLocationAddress(request.getLocation() + (request.getAddress() != null ? ", " + request.getAddress() : ""));
+        entity.setLocation(request.getLocation() + (request.getAddress() != null ? ", " + request.getAddress() : ""));
 
         if (request.getLatitude() != null) {
             entity.setLocationLat(new BigDecimal(request.getLatitude().toString()));
@@ -186,7 +183,7 @@ public class PropertyServiceImpl implements PropertyService {
         ListerInfo listerInfo = new ListerInfo(entity.getLister().getId(), entity.getLister().getFullName());
 
         // Extract location and address from locationAddress
-        String location = entity.getLocationAddress();
+        String location = entity.getLocation();
         String address = "";
         if (location != null && location.contains(", ")) {
             int commaIndex = location.indexOf(", ");
@@ -234,7 +231,7 @@ public class PropertyServiceImpl implements PropertyService {
 
     private PropertySummaryResponse mapEntityToSummaryResponse(Property entity) {
         // Extract location from locationAddress
-        String location = entity.getLocationAddress();
+        String location = entity.getLocation();
         if (location != null && location.contains(", ")) {
             location = location.substring(0, location.indexOf(", "));
         }

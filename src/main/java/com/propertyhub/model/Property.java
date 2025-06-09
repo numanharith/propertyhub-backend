@@ -37,8 +37,8 @@ public class Property {
     @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal price;
 
-    @Column(name = "location_address", nullable = false)
-    private String locationAddress; // Full address
+    @Column(name = "location", nullable = false)
+    private String location; // Full address
 
     @Column(name = "location_lat", precision = 9, scale = 6)
     private BigDecimal locationLat;
